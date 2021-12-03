@@ -1,8 +1,19 @@
 #pragma once
 
+//#include <math.h>
+
 // OpenGL Mathematics
 #include <glm/glm.hpp>
 using namespace glm;
+
+/*
+// isinf() and isnan() for Microsoft Visual C++
+#ifdef _MSC_VER
+#define isinff(a) isinf(a)
+#define isnanf(a) _isnanf(a)
+#endif
+// this is commented because Visual C++ is currently super broke
+*/
 
 // ##### Parameters #####
 
@@ -19,13 +30,13 @@ using namespace glm;
 #define HIT_DIST 0.003f
 
 // Maximum Path-Tracing Bounces
-#define MAX_BOUNCES 16
+#define MAX_BOUNCES 16u
 
 // Maximum Samples
-#define MAX_SAMPLES 32
+#define MAX_SAMPLES 32u
 
 // Maximum Ray-Marching Steps
-#define MAX_STEPS 512
+#define MAX_STEPS 512u
 
 // ##### Constants #####
 

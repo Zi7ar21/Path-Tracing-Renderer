@@ -30,9 +30,9 @@ vec3 radiance(vec3 ro, vec3 rd)
 	vec3 rayPos = ro;
 	vec3 rayDir = rd;
 
-	vec3 attenuation = vec3(1);
+	vec3 attenuation = vec3(1.0f);
 
-	for(unsigned int bounces = 0; bounces < MAX_BOUNCES; bounces++)
+	for(unsigned int bounces = 0u; bounces < MAX_BOUNCES; bounces++)
 	{
 		raycast raycast_data = trace(rayPos, rayDir);
 
@@ -46,23 +46,30 @@ vec3 radiance(vec3 ro, vec3 rd)
 			return sky_radiance(rayDir) * attenuation;
 		}
 
+		float tMin = raycast_data.tMin;
+		vec3  n    = raycast_data.normal;
+		material_properties m = raycast_data.material_data;
+
 		update_material(&raycast_data);
 
-		rayPos += rayDir * (raycast_data.tMin - HIT_DIST);
-
-		vec3 t = ortho(   raycast_data.normal);
-		vec3 b = cross(t, raycast_data.normal);
-		mat3 surf2world = mat3(t, b, raycast_data.normal);
+		vec3 t = ortho(   n);
+		vec3 b = cross(t, n);
+		mat3 surf2world = mat3(t, b, n);
 		mat3 world2surf = transpose(surf2world);
 
 		vec3 wi = cosine_weighted_sample();
 		vec3 wo = world2surf * -rayDir;
 
 		// loicvdb's magic wisdom go brrr
-		attenuation *= BRDF(wi, wo, raycast_data.material_data) / PDF(wi, wo, raycast_data.material_data) * glm::max(wi.z, 0.0f);
+		attenuation *= ( BRDF(wi, wo, m) / PDF(wi, wo, m) ) * glm::max(wi.z, 0.0f);
+
+		rayPos += rayDir * (tMin - HIT_DIST);
+		//rayPos += (rayDir * tMin) + (HIT_DIST * raycast_data.normal);
 
 		rayDir = surf2world * wi;
+
+		rayDir = normalize(rayDir);
 	}
 
-	return vec3(-1);
+	return vec3(-1.0f);
 }

@@ -11,12 +11,12 @@ void write_render(image_buffer render_buffer)
 
 	image_file << "P6\n" << render_buffer.size_x << " " << render_buffer.size_y << "\n255\n";
 
-	for(unsigned int i = 0; i < render_buffer.size; i++)
+	for(unsigned int i = 0u; i < render_buffer.size; i++)
 	{
 		// Quantization
-		unsigned char channel_r = (unsigned char)std::min(std::max( (unsigned int)(255.0 * render_buffer.buffer[i].r), (unsigned int)0 ), (unsigned int)255);
-		unsigned char channel_g = (unsigned char)std::min(std::max( (unsigned int)(255.0 * render_buffer.buffer[i].g), (unsigned int)0 ), (unsigned int)255);
-		unsigned char channel_b = (unsigned char)std::min(std::max( (unsigned int)(255.0 * render_buffer.buffer[i].b), (unsigned int)0 ), (unsigned int)255);
+		unsigned char channel_r = (unsigned char)std::min(std::max( (unsigned int)(255.0f * render_buffer.buffer[i].r), 0u ), 255u);
+		unsigned char channel_g = (unsigned char)std::min(std::max( (unsigned int)(255.0f * render_buffer.buffer[i].g), 0u ), 255u);
+		unsigned char channel_b = (unsigned char)std::min(std::max( (unsigned int)(255.0f * render_buffer.buffer[i].b), 0u ), 255u);
 
 		image_file << channel_r << channel_g << channel_b;
 	}
@@ -32,7 +32,7 @@ void write_render_HDR(image_buffer render_buffer)
 
 	image_file << "PF\n" << render_buffer.size_x << " " << render_buffer.size_y << "\n-1.0\n";
 
-	for(unsigned int i = 0; i < render_buffer.size; i++)
+	for(unsigned int i = 0u; i < render_buffer.size; i++)
 	{
 		// https://stackoverflow.com/questions/30923685/writing-floats-to-a-binary-file-in-c-equivalent-of-javas-dataoutputstream-w
 		image_file.write( reinterpret_cast<const char*>(&render_buffer.buffer[i].r), sizeof(float) );
@@ -55,12 +55,12 @@ void write_frame(image_buffer render_buffer, unsigned int frame_number)
 
 	image_file << "P6\n" << render_buffer.size_x << " " << render_buffer.size_y << "\n255\n";
 
-	for(unsigned int i = 0; i < render_buffer.size; i++)
+	for(unsigned int i = 0u; i < render_buffer.size; i++)
 	{
 		// Quantization
-		unsigned char channel_r = (unsigned char)std::min(std::max( (unsigned int)(255.0 * render_buffer.buffer[i].r), (unsigned int)0 ), (unsigned int)255);
-		unsigned char channel_g = (unsigned char)std::min(std::max( (unsigned int)(255.0 * render_buffer.buffer[i].g), (unsigned int)0 ), (unsigned int)255);
-		unsigned char channel_b = (unsigned char)std::min(std::max( (unsigned int)(255.0 * render_buffer.buffer[i].b), (unsigned int)0 ), (unsigned int)255);
+		unsigned char channel_g = (unsigned char)std::min(std::max( (unsigned int)(255.0f * render_buffer.buffer[i].g), 0u ), 255u);
+		unsigned char channel_r = (unsigned char)std::min(std::max( (unsigned int)(255.0f * render_buffer.buffer[i].r), 0u ), 255u);
+		unsigned char channel_b = (unsigned char)std::min(std::max( (unsigned int)(255.0f * render_buffer.buffer[i].b), 0u ), 255u);
 
 		image_file << channel_r << channel_g << channel_b;
 	}

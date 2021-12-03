@@ -3,15 +3,15 @@
 // http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/
 float mandelbulb(vec3 p)
 {
-	const float power = 8;
+	const float power = 8.0f;
 
 	p = vec3(p.x, p.z, p.y);
 
 	vec3 z = p;
-	float dr = 1;
-	float r  = 0;
+	float dr = 1.0f;
+	float r  = 0.0f;
 
-	for(unsigned int i = 0; i < 128; i++)
+	for(unsigned int i = 0u; i < 128u; i++)
 	{
 		r = length(z);
 
@@ -23,7 +23,7 @@ float mandelbulb(vec3 p)
 		// Convert to Polar Coordinates
 		float theta = glm::acos(z.z/r   );
 		float phi   = glm::atan(z.y, z.x);
-		dr = glm::pow(r, power - 1.0f) * power * dr + 1.0;
+		dr = glm::pow(r, power - 1.0f) * power * dr + 1.0f;
 
 		// Scale and Rotate the Point
 		float zr = glm::pow(r, power);
@@ -63,6 +63,7 @@ float DE(vec3 p, unsigned int *id)
 float DE(vec3 p, unsigned int *id)
 {
 	float DE0 = p.y + 1.0f; // Plane
+	//float DE0 = length( p - vec3(-0, -1, -0) ) - 1.0f;
 	float DE1 = length(p) - 1.0f; // Sphere
 
 	float minDE = glm::min(DE0, DE1);

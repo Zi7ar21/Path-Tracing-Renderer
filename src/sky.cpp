@@ -8,8 +8,8 @@ vec3 sky_radiance(vec3 dir)
 
 	if(d > 0.8f)
 	{
-		return vec3(5);
+		return vec3(5.0f);
 	}
 
-	return vec3(1) * (glm::max( (0.8f * dir.y) + 0.15f, 0.0f ) + 0.05f);
+	return vec3(1.0f) * (glm::max( (0.8f * dir.y) + 0.15f, 0.0f ) + 0.05f);
 }

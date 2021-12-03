@@ -22,28 +22,54 @@ vec2 pixel_filter(vec2 pixel_coord)
 	return pixel_coord + (2.0f * udir2() * w);
 }
 
+/*
 // https://www.iquilezles.org/www/articles/cputiles/cputiles.htm
+void render_image(image_buffer render_buffer)
+{
+	const unsigned int TILE_SIZE = 16u;
+
+	// prep data
+	const unsigned int numxtiles = resolution.x / TILE_SIZE;
+	const unsigned int numytiles = resolution.y / TILE_SIZE;
+	const unsigned int numtiles  = numxtiles * numytiles;
+
+	// render tiles
+	for(unsigned int tile = 0u; i < numtiles; i++)
+	{
+		// tile offset
+		const unsigned int ia = TILE_SIZE * (tile % numxtiles);
+		const unsigned int ja = TILE_SIZE * (tile / numxtiles);
+
+		// for every pixel in this tile, compute color
+		for(unsigned int j = 0u; j < TILE_SIZE; j++) {
+		for(unsigned int i = 0u; i < TILE_SIZE; i++) {
+			image[xres * (ja + j) + (ia + i)] = calcPixelColor(ivec2(ia + i, ja + j), resolution);
+		}
+		}
+	}
+}
+*/
 
 void render_image(image_buffer render_buffer)
 {
 	// Initialize Random Number Generator
-	init_rng(1);
+	init_rng(1u);
 
 	vec2 resolution = vec2(render_buffer.size_x, render_buffer.size_y);
 
-	for(unsigned int pixel_coord_x = 0; pixel_coord_x < render_buffer.size_x; pixel_coord_x++) {
-	for(unsigned int pixel_coord_y = 0; pixel_coord_y < render_buffer.size_y; pixel_coord_y++) {
-		vec3 color = vec3(0);
-		unsigned int samples = 0;
+	for(unsigned int pixel_coord_x = 0u; pixel_coord_x < render_buffer.size_x; pixel_coord_x++) {
+	for(unsigned int pixel_coord_y = 0u; pixel_coord_y < render_buffer.size_y; pixel_coord_y++) {
+		vec3 color = vec3(0.0f);
+		unsigned int samples = 0u;
 
-		for(unsigned int i = 0; i < MAX_SAMPLES; i++)
+		for(unsigned int i = 0u; i < MAX_SAMPLES; i++)
 		{
 			//init_rng(i);
 
 			vec2 uv = 2.0f * ( ( pixel_filter( vec2(pixel_coord_x, pixel_coord_y) ) - ( 0.5f * vec2(resolution) ) ) / glm::max(resolution.x, resolution.y) );
 
 			vec3 ro = vec3(0.0f, 0.0f, 4.0f);
-			vec3 rd = normalize( vec3(CAMERA_FOV * uv, -1) );
+			vec3 rd = normalize( vec3(CAMERA_FOV * uv, -1.0f) );
 
 			vec3 c = radiance(ro, rd);
 
@@ -59,7 +85,7 @@ void render_image(image_buffer render_buffer)
 			}
 		}
 
-		color = samples != 0 ? color / float(samples) : color;
+		color = samples != 0u ? color / float(samples) : color;
 
 		#ifdef HDR
 		render_buffer.buffer[pixel_coord_x + (pixel_coord_y * render_buffer.size_x)] = color;
@@ -74,8 +100,25 @@ void render_image(image_buffer render_buffer)
 // ##### Main #####
 int main()
 {
-	const unsigned int RENDER_SIZE_X = 640;
-	const unsigned int RENDER_SIZE_Y = 480;
+	const unsigned int RENDER_SIZE_X = 256u;
+	const unsigned int RENDER_SIZE_Y = 192u;
+
+	std::cout << "\nThe Order of the Simulation Path-Tracing Renderer" << std::endl;
+
+	// Output Render Parameters
+	std::cout << "\nSettings:\n"
+	<< "\nRender Size: " << RENDER_SIZE_X << "x" << RENDER_SIZE_Y
+	<< "\nHDR Output: " <<
+	#ifdef HDR
+	"Yes"
+	#else
+	"No\nExposure: " << EXPOSURE
+	#endif
+	<< "\nCamera FOV: " << CAMERA_FOV
+	<< "\nMaximum Samples: " << MAX_SAMPLES
+	<< "\nMaximum Bounces: " << MAX_BOUNCES
+	<< "\nMaximum Ray-Marching Steps: " << MAX_STEPS
+	<< "\nRay-Marching Tolerance: " << HIT_DIST << "\n" << std::endl;
 
 	std::cout << "Initializing..." << std::endl;
 
@@ -83,11 +126,11 @@ int main()
 
 	render_buffer.allocate(RENDER_SIZE_X, RENDER_SIZE_Y);
 
-	std::cout << "Starting Render..." << std::endl;
+	std::cout << "\nStarting Render..." << std::endl;
 
 	render_image(render_buffer);
 
-	std::cout << "Writing Render to Disk..." << std::endl;
+	std::cout << "\nWriting Render to Disk..." << std::endl;
 
 	#ifdef HDR
 	write_render_HDR(render_buffer);
@@ -95,11 +138,11 @@ int main()
 	write_render(render_buffer);
 	#endif
 
-	std::cout << "Cleaning Up..." << std::endl;
+	std::cout << "\nCleaning Up..." << std::endl;
 
 	render_buffer.cleanup();
 
-	std::cout << "Done!" << std::endl;
+	std::cout << "\nDone!\n" << std::endl;
 
 	return EXIT_SUCCESS;
 }

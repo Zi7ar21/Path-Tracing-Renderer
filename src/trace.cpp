@@ -3,6 +3,7 @@
 // SDF Tetrahedron Numerical Normals
 vec3 calculate_normal(vec3 p)
 {
+	/*
 	unsigned int null_id;
 
 	return normalize(
@@ -11,6 +12,16 @@ vec3 calculate_normal(vec3 p)
 	vec3( 1, -1,  1) * DE(p + vec3( 1, -1,  1) * HIT_DIST, &null_id) +
 	vec3( 1,  1, -1) * DE(p + vec3( 1,  1, -1) * HIT_DIST, &null_id)
 	);
+	*/
+
+	unsigned int null_id;
+
+	vec3 v0 = vec3(-1.0f, -1.0f, -1.0f) * DE(p + (vec3(-1.0f, -1.0f, -1.0f) * HIT_DIST), &null_id);
+	vec3 v1 = vec3(-1.0f,  1.0f,  1.0f) * DE(p + (vec3(-1.0f,  1.0f,  1.0f) * HIT_DIST), &null_id);
+	vec3 v2 = vec3( 1.0f, -1.0f,  1.0f) * DE(p + (vec3( 1.0f, -1.0f,  1.0f) * HIT_DIST), &null_id);
+	vec3 v3 = vec3( 1.0f,  1.0f, -1.0f) * DE(p + (vec3( 1.0f,  1.0f, -1.0f) * HIT_DIST), &null_id);
+
+	return normalize(v0 + v1 + v2 + v3);
 }
 
 bool inside_bounding_box(vec3 p, vec3 minimum, vec3 maximum)
@@ -82,19 +93,19 @@ raycast trace(vec3 ro, vec3 rd)
 {
 	raycast raycast_data;
 
-	raycast_data.expire = true   ;
-	raycast_data.hit    = false  ;
-	raycast_data.tMin   = -1.0f  ;
-	raycast_data.tMax   = -1.0f  ;
-	raycast_data.normal = vec3(0);
+	raycast_data.expire = true     ;
+	raycast_data.hit    = false    ;
+	raycast_data.tMin   = -1.0f    ;
+	raycast_data.tMax   = -1.0f    ;
+	raycast_data.normal = vec3(0.0f);
 	raycast_data.material_data.material_id = 0;
 
 	float t = 0;
-	unsigned int id = 0;
+	unsigned int id = 0u;
 
-	for(unsigned int i = 0; i < MAX_STEPS; i++)
+	for(unsigned int i = 0u; i < MAX_STEPS; i++)
 	{
-		vec3 rayPos = ro + rd * t;
+		vec3 rayPos = ro + (rd * t);
 
 		//if(glm::abs(rayPos.x) > 2.3f || glm::abs(rayPos.y) > 2.3f || rayPos.z > 4.01f || rayPos.z < -2.3f)
 		if(glm::abs(rayPos.x) > 8.0f || glm::abs(rayPos.y) > 8.0f || glm::abs(rayPos.z) > 8.0f)

@@ -27,7 +27,7 @@ float random_float()
 	// Update RNG
 	ns = triple32(ns);
 
-	return float(ns)/float(0xFFFFFFFFu);
+	return float(ns) / float(0xFFFFFFFFu);
 }
 
 // 2-Component Uniform Random Vector
