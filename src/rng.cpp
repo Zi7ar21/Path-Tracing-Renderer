@@ -1,13 +1,5 @@
 #include <common.hpp>
 
-// Random Number Generator Seed
-uint32_t ns;
-
-void init_rng(uint32_t seed)
-{
-	ns = seed;
-}
-
 // https://nullprogram.com/blog/2018/07/31/
 uint32_t triple32(uint32_t x)
 {
@@ -22,80 +14,82 @@ uint32_t triple32(uint32_t x)
 }
 
 // Random Value Between 0.0 and 1.0
-float random_float()
+float uniform_random(uint32_t *rng_state)
 {
-	// Update RNG
-	ns = triple32(ns);
+	*rng_state = triple32(*rng_state);
 
-	return float(ns) / float(0xFFFFFFFFu);
+	return float(*rng_state) / float(0xFFFFFFFFu);
 }
 
 // 2-Component Uniform Random Vector
-vec2 rand2()
+vec2 rand2(uint32_t *rng_state)
 {
 	vec2 vector;
-	vector.x = random_float();
-	vector.y = random_float();
+	vector.x = uniform_random(rng_state);
+	vector.y = uniform_random(rng_state);
 	return vector;
 }
 
 // 3-Component Uniform Random Vector
-vec3 rand3()
+vec3 rand3(uint32_t *rng_state)
 {
 	vec3 vector;
-	vector.x = random_float();
-	vector.y = random_float();
-	vector.z = random_float();
+	vector.x = uniform_random(rng_state);
+	vector.y = uniform_random(rng_state);
+	vector.y = uniform_random(rng_state);
 	return vector;
 }
 
 // 4-Component Uniform Random Vector
-vec4 rand4()
+vec4 rand4(uint32_t *rng_state)
 {
 	vec4 vector;
-	vector.x = random_float();
-	vector.y = random_float();
-	vector.z = random_float();
-	vector.w = random_float();
+	vector.x = uniform_random(rng_state);
+	vector.y = uniform_random(rng_state);
+	vector.z = uniform_random(rng_state);
+	vector.w = uniform_random(rng_state);
 	return vector;
+}
+
+// Uniformly distributied random point on a unit circle
+vec2 udir2(uint32_t *rng_state)
+{
+	float z = uniform_random(rng_state);
+	float r = 2.0f * M_PI * z;
+	float s = glm::sin(r), c = glm::cos(r);
+	return vec2(s, c);
+}
+
+// Uniformly distributed random point on the surface of a unit sphere
+vec3 udir3(uint32_t *rng_state)
+{
+	vec2 z = rand2(rng_state);
+	vec2 r = vec2( 2.0f * M_PI * z.x, glm::acos(2.0f * z.y - 1.0f) );
+	vec2 s = glm::sin(r), c = glm::cos(r);
+	return vec3(c.x * s.y, s.x * s.y, c.y);
 }
 
 // See michael0884's usage of PCG Random
 // https://www.shadertoy.com/view/wltcRS
 // https://www.shadertoy.com/view/WttyWX
 
-vec2 nrand2(vec2 mean, float sigma)
+vec2 nrand2(vec2 mean, float sigma, uint32_t *rng_state)
 {
-	vec2 z = rand2();
-	return mean + sigma * glm::sqrt( -2.0f * glm::log(z.x) ) * vec2( glm::cos(2.0f * pi * z.y), glm::sin(2.0f * pi * z.y) );
+	vec2 z = rand2(rng_state);
+	vec2 v = vec2(glm::cos(2.0f * M_PI * z.y), glm::sin(2.0f * M_PI * z.y) );
+	return mean + sigma * glm::sqrt( -2.0f * glm::log(z.x) ) * v;
 }
 
-vec3 nrand3(vec3 mean, float sigma)
+vec3 nrand3(vec3 mean, float sigma, uint32_t *rng_state)
 {
-	vec4 z = rand4();
-	return mean + sigma * glm::sqrt( -2.0f * glm::log( vec3(z.x, z.x, z.y ) ) ) * vec3( glm::cos(2.0f * pi * z.z), glm::sin(2.0f * pi * z.z), glm::cos(2.0f * pi * z.w) );
+	vec4 z = rand4(rng_state);
+	vec3 v = vec3(glm::cos(2.0f * M_PI * z.z), glm::sin(2.0f * M_PI * z.z), glm::cos(2.0f * M_PI * z.w) );
+	return mean + sigma * glm::sqrt( -2.0f * glm::log( vec3(z.x, z.x, z.y) ) ) * v;
 }
 
-vec4 nrand4(vec4 mean, float sigma)
+vec4 nrand4(vec4 mean, float sigma, uint32_t *rng_state)
 {
-	vec4 z = rand4();
-	return mean + sigma * glm::sqrt( -2.0f * glm::log( vec4(z.x, z.x, z.y, z.y) ) ) * vec4( glm::cos(2.0f * pi * z.z), glm::sin(2.0f * pi * z.z), glm::cos(2.0f * pi * z.w), glm::sin(2.0f * pi * z.w) );
-}
-
-// Random Uniform Direction
-vec2 udir2()
-{
-	float z = rand();
-	float r = 2.0f * pi * z;
-	float s = glm::sin(r), c = glm::cos(r);
-	return vec2(s, c);
-}
-
-// Random Uniform Direction
-vec3 udir3()
-{
-	vec2 z = rand2();
-	vec2 r = vec2( 2.0f * pi * z.x, acosf(2.0f * z.y - 1.0f) );
-	vec2 s = glm::sin(r), c = glm::cos(r);
-	return vec3(s.y * c.x, s.x * s.y, c.y);
+	vec4 z = rand4(rng_state);
+	vec4 v = vec4(glm::cos(2.0f * M_PI * z.z), glm::sin(2.0f * M_PI * z.z), glm::cos(2.0f * M_PI * z.w), glm::sin(2.0f * M_PI * z.w) );
+	return mean + sigma * glm::sqrt( -2.0f * glm::log( vec4(z.x, z.x, z.y, z.y) ) ) * v;
 }
