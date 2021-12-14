@@ -43,8 +43,22 @@ vec3 calculate_normal(vec3 p)
 	);
 }
 
-float trace(vec3 ro, vec3 rd)
+struct raycast
 {
+	bool discard;
+	bool hit;
+	float t;
+	vec3 n;
+};
+
+raycast trace(vec3 ro, vec3 rd)
+{
+	raycast output_data;
+	output_data.discard = true;
+	output_data.hit = false;
+	output_data.t = -1.0f;
+	output_data.n = vec3(0);
+
 	float t = 0.0f;
 
 	for(unsigned int i = 0u; i < 128u; i++)
@@ -53,6 +67,7 @@ float trace(vec3 ro, vec3 rd)
 
 		if(glm::abs(p.x) > 4.0f || glm::abs(p.y) > 4.0f || glm::abs(p.z) > 4.0f)
 		{
+			output_data.discard = false;
 			break;
 		}
 
@@ -60,13 +75,17 @@ float trace(vec3 ro, vec3 rd)
 
 		if(d < HIT_DIST)
 		{
-			return t;
+			output_data.discard = false;
+			output_data.hit = true;
+			output_data.t = t;
+			output_data.n = calculate_normal(p);
+			break;
 		}
 
 		t += d;
 	}
 
-	return -1.0f;
+	return output_data;
 }
 
 vec3 sky_radiance(vec3 dir)
@@ -88,17 +107,20 @@ vec3 radiance(vec3 ro, vec3 rd, uint32_t *rng_state)
 
 	for(unsigned int bounces = 0u; bounces < 4u; bounces++)
 	{
-		float t = trace(ray_pos, ray_dir);
+		raycast t = trace(ray_pos, ray_dir);
 
-		if(t < 0.0f)
+		if(t.discard)
+		{
+			break;
+		}
+
+		if(!t.hit)
 		{
 			return att * sky_radiance(ray_dir);
 		}
 
-		vec3 n = calculate_normal(ro + rd * t);
-
-		ray_pos += ray_dir * (t - HIT_DIST);
-		ray_dir = reflect( ray_dir, normalize( nrand3(n, 1.0f, rng_state) ) );
+		ray_pos += ray_dir * (t.t - HIT_DIST);
+		ray_dir = reflect( ray_dir, normalize( nrand3(t.n, 1.0f, rng_state) ) );
 
 		att *= vec3(0.8f, 0.8f, 0.8f);
 	}
